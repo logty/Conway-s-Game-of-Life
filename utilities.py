@@ -1,5 +1,7 @@
 from numpy import random as numpyRandom
 import numpy as np
+from settings import *
+import time
 
 def getSumNeighbourCells(array,x,y):
     if x<1 or x > len(array[0]) or y < 1 or y > len(array):
@@ -20,3 +22,15 @@ l = numpyRandom.randint(2,size=(10,10))
 print l
 print getSumNeighbourCells(l,-1,2)
 '''
+
+def pixel(image, pos, color):
+    r,g,b = color
+    x,y = pos
+    image.put("#%02x%02x%02x" % (r,g,b), (y, x))
+
+def setPixels(image, array):
+    print 'setPixels:' + str(time.clock())
+    for j in range(len(array)):
+        for i in range(len(array[0])):
+            pixel(image,(i,j),np.multiply(DEF_COLOR,array[j][i]))
+    print time.clock()
