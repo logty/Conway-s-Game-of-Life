@@ -3,6 +3,7 @@ from utilities import *
 from numpy import *
 from settings import *
 from gameOfLife import *
+from PIL import Image, ImageTk
 
 class App:
     def __init__(self,master):
@@ -77,10 +78,10 @@ class App:
                              bd = 4)
         self.canvas.grid(row=0,column=2, rowspan = 7)
 
-        self.canvasImage = PhotoImage(width=WIDTH, height = HEIGHT)
+        self.canvasImage = PhotoImage(width=WIDTH, height = HEIGHT)#Image.new("RGB",(WIDTH,HEIGHT),color='blue')#
         self.GOLHandler = gameOfLife(WIDTH,HEIGHT)
         setPixels(self.canvasImage, self.GOLHandler.board)
-        self.canvas.create_image((5+WIDTH/2,5+HEIGHT/2),image = self.canvasImage)
+        self.canvas.create_image((5+WIDTH/2,5+HEIGHT/2),image = self.canvasImage)#ImageTk.PhotoImage(
         
     def update(self):
         self.updateObject = self.master.after(TIMESTEP,self.update)

@@ -14,7 +14,7 @@ class gameOfLife:
         if array==None:
             self.height = height
             self.width = width
-            self.board = numpyRandom.randint(2,size=(height,width)) #filled with 0,1
+            self.board = numpyRandom.randint(2,size=(height,width)).astype(bool) #filled with 0,1
         else:
             self.board = array
             self.height = len(array) #tells us the height of the first column
