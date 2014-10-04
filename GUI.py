@@ -34,7 +34,7 @@ class App:
                                  command=self.play).grid(row = 4, column = 0)
         self.restartButton = Button(master,
                                     text="Restart",
-                                    command = self.updateBoard).grid(row = 3, column = 0)
+                                    command = self.restart).grid(row = 3, column = 0)
         self.exportButton = Button(master,
                                    text="Export").grid(row = 5, column = 0)
         self.importButton = Button(master,
@@ -78,23 +78,35 @@ class App:
                              bd = 4)
         self.canvas.grid(row=0,column=2, rowspan = 7)
 
-        self.canvasImage = PhotoImage(width=WIDTH, height = HEIGHT)#Image.new("RGB",(WIDTH,HEIGHT),color='blue')#
+        self.canvasImage = PhotoImage(width=WIDTH, height = HEIGHT)
+        #ImageTk.PhotoImage(Image.new("RGB",(WIDTH,HEIGHT),color='blue'))
         self.GOLHandler = gameOfLife(WIDTH,HEIGHT)
         setPixels(self.canvasImage, self.GOLHandler.board)
         self.canvas.create_image((5+WIDTH/2,5+HEIGHT/2),image = self.canvasImage)#ImageTk.PhotoImage(
         
     def update(self):
-        self.updateObject = self.master.after(TIMESTEP,self.update)
+        self.updateBoard()
+        self.updateObject = self.master.after(int(TIMESTEP*1000),self.update)
 
     def updateDimensions(self):
         self.canvas.configure(width=int(float(self.canvasWidth.get())))
         self.canvas.configure(height=int(float(self.canvasHeight.get())))
-
+        self.restart()
+    
     def updateBoard(self):
+        x = int(float(self.canvasWidth.get()))
+        y = int(float(self.canvasHeight.get()))
         self.GOLHandler.getNextBoard()
         setPixels(self.canvasImage, self.GOLHandler.board)
-        self.canvas.create_image((5+WIDTH/2,5+HEIGHT/2),
+        self.canvas.create_image((5+x/2,5+y/2),
                                  image = self.canvasImage)
+
+    def createNewCanvas(self,width,height):
+        print width
+        self.canvasImage = PhotoImage(width=width,height= height)
+        #ImageTk.PhotoImage(Image.new("RGB",(WIDTH,HEIGHT),color='blue'))
+        setPixels(self.canvasImage, self.GOLHandler.board)
+        self.canvas.create_image((5+width/2,5+height/2),image = self.canvasImage)
         
     def play(self):
         if self.updateObject==None:
@@ -104,6 +116,13 @@ class App:
         if not self.updateObject==None:
             self.master.after_cancel(self.updateObject)
             self.updateObject=None
+    
+    def restart(self, array=None): #defaults to random board unless board is put in
+        x = int(float(self.canvasWidth.get()))
+        y = int(float(self.canvasHeight.get()))
+        self.GOLHandler.restart(x,y, array)
+        self.createNewCanvas(x,y)
+        
 
 root = Tk()
 app = App(root)

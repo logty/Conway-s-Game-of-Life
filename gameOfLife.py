@@ -11,14 +11,7 @@ import time
 
 class gameOfLife:
     def __init__(self,  width,height,array=None): #auto generates array, 2-dimensional
-        if array==None:
-            self.height = height
-            self.width = width
-            self.board = numpyRandom.randint(2,size=(height,width)).astype(bool) #filled with 0,1
-        else:
-            self.board = array
-            self.height = len(array) #tells us the height of the first column
-            self.width = len(array[0]) #tells us the width of the first row
+        self.restart(width,height,array)
         
 
     def getNextBoard(self):
@@ -28,3 +21,14 @@ class gameOfLife:
             for i in range(1,self.width-1):
                 self.board[j][i]=util.getCell(oldBoard,i,j)
         print time.clock()
+
+    def restart(self,  width,height,array=None):
+        if array==None:
+            self.height = height
+            self.width = width
+            self.board = numpyRandom.randint(2,size=(height,width)).astype(bool) #filled with 0,1
+        else:
+            self.board = array
+            self.height = len(array) #tells us the height of the first column
+            self.width = len(array[0]) #tells us the width of the first row
+        

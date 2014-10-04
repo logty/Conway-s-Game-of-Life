@@ -2,7 +2,7 @@ from numpy import random as numpyRandom
 import numpy as np
 from settings import *
 import time
-from PIL import Image
+from PIL import Image, ImageTk
 
 def getSumNeighbourCells(array,x,y):
     if x<1 or x > len(array[0]) or y < 1 or y > len(array):
@@ -18,11 +18,6 @@ def getCell(array,x,y):
         return True
     if neighbourSum==2:
         return array[y][x]
-''' For testing purposes
-l = numpyRandom.randint(2,size=(10,10))
-print l
-print getSumNeighbourCells(l,-1,2)
-'''
 
 def pixel(image, pos, color):
     r,g,b = color
@@ -35,5 +30,9 @@ def setPixels(image, array):
     for j in range(len(array)):
         for i in range(len(array[0])):
             pixel(image,(i,j),np.multiply(DEF_COLOR,array[j][i]))
-    #image = Image.fromarray(array)
+    '''
+    for j in range(len(array)):
+        for i in range(len(array[0])):
+            pixel(image,(i,j),np.multiply(DEF_COLOR,array[j][i]))
+    image = ImageTk.PhotoImage(Image.fromarray(np.multiply(array, DEF_COLOR)))'''
     print time.clock()
