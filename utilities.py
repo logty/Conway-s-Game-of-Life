@@ -18,21 +18,3 @@ def getCell(array,x,y):
         return True
     if neighbourSum==2:
         return array[y][x]
-
-def pixel(image, pos, color):
-    r,g,b = color
-    x,y = pos
-    image.put("#%02x%02x%02x" % (r,g,b), (y, x))
-
-def setPixels(image, array):
-    
-    print 'setPixels:' + str(time.clock())
-    for j in range(len(array)):
-        for i in range(len(array[0])):
-            pixel(image,(i,j),np.multiply(DEF_COLOR,array[j][i]))
-    '''
-    for j in range(len(array)):
-        for i in range(len(array[0])):
-            pixel(image,(i,j),np.multiply(DEF_COLOR,array[j][i]))
-    image = ImageTk.PhotoImage(Image.fromarray(np.multiply(array, DEF_COLOR)))'''
-    print time.clock()
