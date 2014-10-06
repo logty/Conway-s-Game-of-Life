@@ -3,6 +3,7 @@ import numpy as np
 import copy
 import utilities as util
 import time
+from settings import *
 
 #Array format 
 '''array([[ 0.14022471,  0.96360618],  
@@ -10,11 +11,13 @@ import time
        [ 0.49313049,  0.94909878]]) '''
 
 class gameOfLife:
-    def __init__(self,  width,height,array=None): #auto generates array, 2-dimensional
+    def __init__(self,width,height,array=None): #auto generates array, 2-dimensional
         self.restart(width,height,array)
         
 
     def getNextBoard(self):
+        sumBoard = [[0]*WIDTH]*HEIGHT
+        
         print time.clock()
         oldBoard = copy.deepcopy(self.board) #make an old copy for reference
         for j in range(1,self.height-1): #ignores edge cells

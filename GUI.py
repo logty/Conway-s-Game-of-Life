@@ -3,7 +3,7 @@ from utilities import *
 from numpy import *
 from settings import *
 from gameOfLife import *
-from PIL import Image, ImageTk
+import h5py
 
 #For MatPlotLib visualization
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
@@ -20,6 +20,8 @@ class App:
         #set columns across
         rws = 7
         #set rows down
+
+        self.TS = TIMESTEP
         
         ##################
         ### Graphics
@@ -41,9 +43,13 @@ class App:
                                     text="Restart",
                                     command = self.restart).grid(row = 3, column = 0)
         self.exportButton = Button(master,
-                                   text="Export").grid(row = 5, column = 0)
+                                   text="Export",
+                                   command = self.exportDataset
+                                   ).grid(row = 5, column = 0)
         self.importButton = Button(master,
-                                   text="Import").grid(row = 6, column = 0)
+                                   text="Import",
+                                   command = self.importDataset
+                                   ).grid(row = 6, column = 0)
 
         ##############
         ### Column 1
@@ -66,8 +72,11 @@ class App:
         self.setDimensions = Button(master, text="Set Dimensions", command=self.updateDimensions).grid(row = 3, column = 1)
         self.pauseButton = Button(master, text="Pause", command=self.pause).grid(row = 4, column = 1)
         
-        Entry(master).grid(row = 5, column = 1)
-        Entry(master).grid(row = 6, column = 1)
+        self.exportData = Entry(master)
+        self.exportData.grid(row = 5, column = 1)
+        
+        self.importData = Entry(master)
+        self.importData.grid(row = 6, column = 1)
 
 
         ##############
@@ -81,12 +90,12 @@ class App:
         
     def update(self):
         self.updateBoard()
-        self.updateObject = self.master.after(int(TIMESTEP*1000),self.update)
+        self.updateObject = self.master.after(int(self.TS*1000),self.update)
 
     def updateDimensions(self):
         self.restart()
 
-    def display(self):
+    def display(self): #Plots the given board given by GOL Handler
         f = Figure(figsize=(5,5), dpi=DPI)
         a = f.add_subplot(111)
         a.imshow(self.GOLHandler.board,cmap='hot',interpolation='nearest')
@@ -102,17 +111,37 @@ class App:
         
     def play(self):
         if self.updateObject==None:
-            self.updateObject = self.master.after(100,self.update)
+            self.updateObject = self.master.after(int(1000*self.TS),self.update)
             
     def pause(self):
         if not self.updateObject==None:
             self.master.after_cancel(self.updateObject)
             self.updateObject=None
+
+    def exportDataset(self):
+        f = h5py.File(self.exportData.get()+'.hdf5','a')
+        try:
+            t = f['/default']
+            del f['/default']
+            f['/default'] = self.GOLHandler.board
+        except KeyError:
+            f.create_dataset("default",data=self.GOLHandler.board)
+        f.close()
+
+    def importDataset(self):
+        try:
+            f = h5py.File(self.exportData.get()+'.hdf5','r+')
+            t = f['/default']
+            self.restart(t[:])
+            f.close()
+        except IOError:
+            self.importData.insert(0,'No existe!')
     
     def restart(self, array=None): #defaults to random board unless board is put in
         x, y = self.canvasDimGet()
         self.GOLHandler.restart(x,y, array)
         self.display()
+        self.TS = float(self.timeStep.get())
         
 
 root = Tk()
