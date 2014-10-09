@@ -2,7 +2,6 @@ from numpy import random as numpyRandom
 import numpy as np
 from settings import *
 import time
-from PIL import Image, ImageTk
 
 def getSumNeighbourCells(array,x,y):
     if x<1 or x > len(array[0]) or y < 1 or y > len(array):
@@ -18,3 +17,11 @@ def getCell(array,x,y):
         return True
     if neighbourSum==2:
         return array[y][x]
+
+def getAlive(neighbourSum,cell):
+    if neighbourSum<2 or neighbourSum>3:
+        return False
+    if neighbourSum==3:
+        return True
+    if neighbourSum==2:
+        return cell

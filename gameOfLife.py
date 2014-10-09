@@ -10,19 +10,27 @@ from settings import *
        [ 0.37601032,  0.25528411],  
        [ 0.49313049,  0.94909878]]) '''
 
+SUM = [[1,1,1],[1,0,1],[1,1,1]]
+
 class gameOfLife:
     def __init__(self,width,height,array=None): #auto generates array, 2-dimensional
         self.restart(width,height,array)
         
 
     def getNextBoard(self):
-        sumBoard = [[0]*WIDTH]*HEIGHT
-        
         print time.clock()
+        '''
         oldBoard = copy.deepcopy(self.board) #make an old copy for reference
         for j in range(1,self.height-1): #ignores edge cells
             for i in range(1,self.width-1):
                 self.board[j][i]=util.getCell(oldBoard,i,j)
+        print time.clock()'''
+
+        #######New TESTING!!
+        oldBoard = copy.deepcopy(self.board) #make an old copy for reference
+        for j in range(1,self.height-1): #ignores edge cells
+            for i in range(1,self.width-1):
+                self.board[j][i]=util.getAlive(np.sum(oldBoard[j-1:j+2,i-1:i+2]*SUM),oldBoard[j][i])
         print time.clock()
 
     def restart(self,  width,height,array=None):

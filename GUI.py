@@ -4,6 +4,8 @@ from numpy import *
 from settings import *
 from gameOfLife import *
 import h5py
+from tkFileDialog import *
+from tkMessageBox import *
 
 #For MatPlotLib visualization
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
@@ -50,6 +52,10 @@ class App:
                                    text="Import",
                                    command = self.importDataset
                                    ).grid(row = 6, column = 0)
+        self.newFileButton = Button(master,
+                                    text="New File!",
+                                    command = self.createNewFile
+                                    ).grid(row=7,column=0,columnspan=2)
 
         ##############
         ### Column 1
@@ -65,19 +71,34 @@ class App:
         self.canvasHeight.insert(0,str(HEIGHT))
         self.canvasHeight.grid(row = 1, column = 1)
         
-        self.timeStep = Entry(master)
-        self.timeStep.insert(0,TIMESTEP)
-        self.timeStep.grid(row = 2, column = 1)
+        timeStepTextVar = StringVar(master)
+        timeStepTextVar.set('0.1')
+        timeStepGUI = apply(OptionMenu,
+                              (master,timeStepTextVar)+tuple(TIME_STEP_OPTIONS))
+        #TIME_STEP_OPTIONS stored in settings file
+        timeStepGUI.grid(row=2,column=1)
+        self.timeStep = timeStepTextVar
+        self.timeStep.trace('w',self.timeStepUpdate)
+        #Trace binds a function to a change in the text
         
         self.setDimensions = Button(master, text="Set Dimensions", command=self.updateDimensions).grid(row = 3, column = 1)
         self.pauseButton = Button(master, text="Pause", command=self.pause).grid(row = 4, column = 1)
-        
-        self.exportData = Entry(master)
-        self.exportData.grid(row = 5, column = 1)
-        
-        self.importData = Entry(master)
-        self.importData.grid(row = 6, column = 1)
 
+        self.exportDataButton = Button(master,
+                                       text=SELECT_FILE_TEXT,
+                                       command=self.getExportFile,
+                                       relief=GROOVE)
+        self.exportDataButton.grid(row=5,column=1)
+        self.exportDataFile = SELECT_FILE_TEXT
+        
+        self.importDataButton = Button(master,
+                                 text=SELECT_FILE_TEXT,
+                                 command=self.getImportFile,
+                                 relief=GROOVE)
+        self.importDataButton.grid(row = 6, column = 1)
+        self.importDataFile=SELECT_FILE_TEXT
+        
+        #self.importData = Button(master,"No file selected
 
         ##############
         ### Column 3
@@ -87,6 +108,10 @@ class App:
         
         self.GOLHandler = gameOfLife(WIDTH,HEIGHT)
         self.display()
+
+        ##############
+        ### End Graphics
+        ##############
         
     def update(self):
         self.updateBoard()
@@ -100,10 +125,23 @@ class App:
         a = f.add_subplot(111)
         a.imshow(self.GOLHandler.board,cmap='hot',interpolation='nearest')
         self.canvas = FigureCanvasTkAgg(f,master=self.master)
-        self.canvas._tkcanvas.grid(row=0,column=2,rowspan=7)
+        self.canvas._tkcanvas.grid(row=0,column=2,rowspan=8)
 
     def canvasDimGet(self):
-        return (int(float(self.canvasWidth.get())),int(float(self.canvasHeight.get())))
+        #Error handling, if Canvas dimensions not integers default to 100
+        try:
+            temp_x = int(float(self.canvasWidth.get()))
+        except ValueError:
+            temp_x = 100
+            self.canvasWidth.delete(0,END)
+            self.canvasWidth.insert(0,'100')
+        try:
+            temp_y = int(float(self.canvasHeight.get()))
+        except ValueError:
+            temp_y = 100
+            self.canvasHeight.delete(0,END)
+            self.canvasHeight.insert(0,'100')
+        return (temp_x,temp_y)
     
     def updateBoard(self):
         self.GOLHandler.getNextBoard()
@@ -119,31 +157,61 @@ class App:
             self.updateObject=None
 
     def exportDataset(self):
-        f = h5py.File(self.exportData.get()+'.hdf5','a')
-        try:
-            t = f['/default']
-            del f['/default']
-            f['/default'] = self.GOLHandler.board
-        except KeyError:
-            f.create_dataset("default",data=self.GOLHandler.board)
-        f.close()
+        if not self.exportDataFile.split('.')[-1]=='hdf5':
+            showinfo(title="Warning!", message="No valid file!")
+        else:
+            f = h5py.File(self.exportDataFile,'a')
+            try:
+                t = f['/default']
+                del f['/default']
+                f['/default'] = self.GOLHandler.board
+            except KeyError:
+                f.create_dataset("default",data=self.GOLHandler.board)
+            f.close()
 
     def importDataset(self):
-        try:
-            f = h5py.File(self.exportData.get()+'.hdf5','r+')
-            t = f['/default']
-            self.restart(t[:])
-            f.close()
-        except IOError:
-            self.importData.insert(0,'No existe!')
+        if not self.importDataFile.split('.')[-1]=='hdf5':
+            showinfo(title='Warning!', message="No valid file!")
+        else:
+            try:
+                f = h5py.File(self.importDataFile,'r+')
+                t = f['/default']
+                self.restart(t[:])
+                f.close()
+            except IOError:
+                self.importData.insert(0,'No existe!')
+            
+    def getExportFile(self,temp_file=None):
+        if not temp_file==None:
+            self.exportDateFile=temp_file
+        else:
+            self.exportDataFile=askopenfilename(parent=self.master,
+                                                  filetypes=[('HDF5','*.hdf5')])
+        
+        print self.exportDataFile + "Why isn't this working?????"
+        if self.exportDataFile=='':
+            self.exportDataFile=SELECT_FILE_TEXT
+        self.exportDataButton.config(text=self.exportDataFile.split('/')[-1])
+
+    def getImportFile(self):
+        self.importDataFile = askopenfilename(parent=self.master,
+                                              filetypes=[('HDF5','*.hdf5')])
+        if self.importDataFile=='':
+            self.importDataFile=SELECT_FILE_TEXT
+        self.importDataButton.config(text=self.importDataFile.split('/')[-1])
+
+    def createNewFile(self):
+        l = asksaveasfilename(parent=self.master,
+                              filetypes=[('HDF5','*.hdf5')])
+        self.getExportFile( l)
     
     def restart(self, array=None): #defaults to random board unless board is put in
         x, y = self.canvasDimGet()
         self.GOLHandler.restart(x,y, array)
         self.display()
-        self.TS = float(self.timeStep.get())
         
-
+    def timeStepUpdate(self,*args):
+        self.TS = float(self.timeStep.get())
 root = Tk()
 app = App(root)
 root.mainloop()
