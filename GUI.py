@@ -11,7 +11,7 @@ from tkMessageBox import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from matplotlib.figure import Figure
 import matplotlib
-
+ 
 class App:
     def __init__(self,master):
         self.master = master #master = the Tk root
